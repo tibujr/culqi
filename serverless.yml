@@ -1,0 +1,73 @@
+service: ${self:custom.serviceName}
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: DESA
+  region: us-east-2
+  timeout: 60
+  memorySize: 1024
+  versionFunctions: false
+  deploymentBucket:
+    name: ue2culqitokenv01 # reemplazar por bucket creado
+    serverSideEncryption: AES256
+
+  stackTags:
+    NAME: RETOCULQI
+    ENTORNO: PROD
+    AMBIENTE: ${self:provider.stage}
+    PROYECTO: API-CULQI
+    RESPONSABLE: Moises Tiburcio
+  architecture: arm64
+
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    REGION: ${self:provider.region}
+
+custom:
+  name: API-CULQI
+  serviceName: ${self:custom.name}-01
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: false
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+
+package:
+  individually: true
+
+functions:
+  token:
+    handler: src/tokens/Infrastructure/route/TokenRoute.handler
+    name: LMBCULQITOKEN
+    description: Tokenización de una tarjeta de crédito O débito
+    events:
+      - http:
+          method: POST
+          path: /tokens
+          integration: lambda
+          response:
+            headers:
+              Access-Control-Allow-Origin: "'*'"
+            template: $input.path('$')
+    environment:
+      TEST_TK: TEST_TOKEN
+  
+  cards:
+    handler: src/tokens/Infrastructure/route/CardRoute.handler
+    name: LMBCULQICARD
+    description: Obtener los datos de la tarjeta desde un token
+    events:
+      - http:
+          method: GET
+          path: /cards
+          integration: lambda
+          response:
+            headers:
+              Access-Control-Allow-Origin: "'*'"
+            template: $input.path('$')
+    environment:
+      TEST_TK: TEST_TOKEN

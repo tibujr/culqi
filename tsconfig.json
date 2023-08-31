@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "preserveConstEnums": true,
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "allowJs": true,
+    "outDir": ".build",
+    "lib": ["es2015"],
+    "rootDir": "./",
+    "target": "ES5",
+    "experimentalDecorators": true    
+  },
+  "exclude": [
+    "node_modules"
+  ]  
+}
